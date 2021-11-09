@@ -1,11 +1,19 @@
 #pragma once
+#include <stdlib.h>
 
-struct Node
+struct NodeList
 {
-    struct Node* node;
-    int pos;
-    char* suffix_link;
-};
-typedef struct Node Node;
+    struct NodeList* parent;
+    char c; int count;
 
-Node build_suffix_tree(char* S, int n);
+};
+typedef struct NodeList NodeList;
+
+typedef struct Node
+{
+    int index, left, right, link;
+    NodeList* next;
+} Node;
+
+int get_count(NodeList* list, char c);
+char** build_suffix_tree(char* S, int n);
