@@ -27,7 +27,7 @@ void* handle_substr(void* args) {
     clock_gettime(CLOCK_MONOTONIC, &end);
     substring sub = {s_start, s_size};
     subs[i] = sub;
-    printf("Поток: %ld.%.9ld с.\n", (end.tv_sec-begin.tv_sec), (end.tv_nsec-begin.tv_nsec));
+    printf("Поток: %ld.%.9ld с.\n", diff(begin, end).tv_sec, diff(begin, end).tv_nsec);
     return NULL;
 }
 
@@ -40,7 +40,7 @@ char* lsrc_pthread(const char* str, int size) {
         memcpy(out, str, sizeof(char));
         return out;
     }
-    const int n_cores = 10; //(const int)get_cores();
+    const int n_cores = (const int)get_cores();
     thread_args* args = calloc(sizeof(thread_args), n_cores);
     substring* subs = calloc(sizeof(substring), n_cores);
     pthread_t thread_ids[n_cores];

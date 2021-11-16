@@ -4,14 +4,15 @@
 
 #include "utils.h"
 
+
 void get_random_str(char* buffer, int b_size, int size) {
     srand(time(NULL));
-    if (size + 1 > b_size) size = b_size - 1;
+    if (size > b_size) size = b_size;
     int lower = 33; int upper = 126;
-    for (int i = 0; i < size; i++) {
+    for (int i = 0; i < size - 1; i++) {
         buffer[i] = (char)((rand() % (upper - lower + 1)) + lower);
     }
-    buffer[size] = '\0';
+    buffer[size-1] = '\0';
 }
 
 void print_string(const char* str) {
@@ -23,4 +24,17 @@ void print_string(const char* str) {
         c = str[i];
     }
     printf("\n");
+}
+
+struct timespec diff(struct timespec start, struct timespec end)
+{
+    struct timespec temp;
+    if ((end.tv_nsec-start.tv_nsec)<0) {
+        temp.tv_sec = end.tv_sec-start.tv_sec-1;
+        temp.tv_nsec = 1000000000+end.tv_nsec-start.tv_nsec;
+    } else {
+        temp.tv_sec = end.tv_sec-start.tv_sec;
+        temp.tv_nsec = end.tv_nsec-start.tv_nsec;
+    }
+    return temp;
 }

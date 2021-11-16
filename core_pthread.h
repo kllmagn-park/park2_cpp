@@ -4,6 +4,7 @@
 #include <unistd.h>
 
 #include "core.h"
+#include "utils.h"
 
 typedef struct {
     int s_start;
