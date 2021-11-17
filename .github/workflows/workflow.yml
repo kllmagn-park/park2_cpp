@@ -121,7 +121,7 @@ jobs:
       - uses: codecov/codecov-action@v2
         with:
           token: ${{secrets.CODECOV_TOKEN}}
-        name: Coverage
+      - name: Coverage
         run: |
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
           sudo make install -C build
