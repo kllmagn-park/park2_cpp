@@ -76,10 +76,10 @@ jobs:
           cmake -B build/static -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DANALYSERS=1
           make -C build/static
           cd build/static && make analysers
+          cd -
 
       - name: StaticValgrind
         run: |
-          cd -
           sudo apt-get install -y valgrind
           cmake -B build/static -DBUILD_STATIC=1 -DVALGRIND=1
           make -C build/static
@@ -105,6 +105,7 @@ jobs:
           cmake -B build/shared -DBUILD_LIB=1 -DSANITIZERS=1 -DCMAKE_BUILD_TYPE=Release
           make -C build/shared
           cd build/shared && ctest --output-on-failure
+          cd -
 
       - name: SharedAnalyze
         run: |
@@ -121,6 +122,7 @@ jobs:
           cmake -B build/shared -DBUILD_LIB=1 -DANALYSERS=1 -DCMAKE_BUILD_TYPE=Release
           make -C build/shared
           cd build/shared && make analysers
+          cd -
 
       - name: SharedValgrind
         run: |
@@ -131,6 +133,7 @@ jobs:
           cmake -B build/shared -DBUILD_LIB=1 -DVALGRIND=1 -DCMAKE_BUILD_TYPE=Release
           make -C build/shared
           cd build/shared/ && valgrind --leak-check=yes ctest
+          cd -
 
   coverage:
     runs-on: ubuntu-latest
