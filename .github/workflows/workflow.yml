@@ -99,7 +99,7 @@ jobs:
           cd -
           rm -rf build/shared
           mkdir -p build/shared
-          cmake -B build/shared/shared -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          cmake -B build/shared -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
           sudo make install -C build/shared
           rm -rf build/shared
           cmake -B build/shared -DBUILD_LIB=1 -DSANITIZERS=1 -DCMAKE_BUILD_TYPE=Release
