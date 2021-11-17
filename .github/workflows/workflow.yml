@@ -66,3 +66,69 @@ jobs:
           sudo chmod +x ./main_shared
           sudo time ./main_static
           sudo time ./main_shared
+
+      - name: StaticSanitize
+        run: |
+          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DWITH_SANITIZERS=1
+          make -C build
+          cd build && ctest --output-on-failure
+
+      - name: StaticAnalyze
+        run: |
+          curl -sSL "https://github.com/facebook/infer/releases/download/v1.1.0/infer-linux64-v1.1.0.tar.xz" |
+          sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
+          sudo pip install scan-build
+          sudo pip install cpplint
+          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DWITH_ANALYSERS=1
+          make -C build
+          cd build && make analysers
+
+      - name: StaticValgrind
+        run: |
+          cmake -B build -DBUILD_STATIC=1 -DWITH_VALGRIND=1
+          make -C build
+          cd build/ && valgrind --leak-check=yes ctest
+
+      - name: SharedSanitize
+        run: |
+          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          sudo make install -C build
+          rm -rf build
+          cmake -B build -DBUILD_LIB=1 -DWITH_SANITIZERS=1 -DCMAKE_BUILD_TYPE=Release
+          make -C build
+          cd build && ctest --output-on-failure
+
+      - name: SharedAnalyze
+        run: |
+          curl -sSL "https://github.com/facebook/infer/releases/download/v1.1.0/infer-linux64-v1.1.0.tar.xz" |
+          sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
+          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          sudo make install -C build
+          rm -rf build
+          cmake -B build -DBUILD_LIB=1 -DWITH_ANALYSERS=1 -DCMAKE_BUILD_TYPE=Release
+          make -C build
+          cd build && make analysers
+
+      - name: SharedValgrind
+        run: |
+          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          sudo make install -C build
+          rm -rf build
+          cmake -B build -DBUILD_LIB=1 -DWITH_VALGRIND=1 -DCMAKE_BUILD_TYPE=Release
+          make -C build
+          cd build/ && valgrind --leak-check=yes ctest
+
+      - name: Coverage
+        run: |
+          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          sudo make install -C build
+          rm -rf build s
+          cmake -B build -DBUILD_STATIC=1 -DWITH_COVERAGE=1 -DCMAKE_BUILD_TYPE=Release
+          make -C build static_lib_test
+          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug -DWITH_COVERAGE=1
+          sudo make install -C build
+          cd build && ctest .
+          cd ..
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          chmod +x codecov
+          ./codecov -f <(gcovr -e '.*/tests/.*' -x)
