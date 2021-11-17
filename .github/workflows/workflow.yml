@@ -32,15 +32,13 @@ jobs:
           cmake -B build/test_time -DCMAKE_BUILD_TYPE=Release -DTESTS=1 -DBUILD_STATIC=1 -DWPADDED=1
           make -C build/test_time
           cd build/test_time && ctest --output-on-failure
-          cd ..
+          cd -
           cp build/test_time/main main_static
           rm -rf build/test_time
           cmake -B build/test_time -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED=1 -DTESTS=1 -DWPADDED=1
           make -C build/test_time
           cd build/test_time && ctest --output-on-failure
-          cd ..
-          ls build
-          ls build/test_time
+          cd -
           cp build/test_time/main main_shared
           rm -rf build/test_time
           sudo chmod +x ./main_static
@@ -139,7 +137,7 @@ jobs:
           cmake -B build/coverage -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=1
           sudo make install -C build/coverage
           cd build/coverage && ctest .
-          cd ..
+          cd -
           curl -Os https://uploader.codecov.io/latest/linux/codecov
           chmod +x codecov
           ./codecov -f <(gcovr -e '.*/tests/.*' -x)
