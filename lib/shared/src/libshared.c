@@ -43,11 +43,8 @@ all_series* get_all_pthread(char* str, int size) {
 
     thread_args* args = calloc(sizeof(thread_args), n_cores);
     pthread_t thread_ids[n_cores];
-    int (*rs)[2] = (int(*)[2])calloc(n_cores, sizeof(int[2]));
 
-    if (!rs || !args) {
-        if (rs) free(rs);
-        if (args) free(args);
+    if (!args) {
         return NULL;
     }
 
@@ -74,6 +71,8 @@ all_series* get_all_pthread(char* str, int size) {
         pthread_join(thread_ids[i], (void*)&thread_rs[i]);
         if (thread_rs[i] == 1) cleanup = true;
     }
+
+    free(args);
 
     if (cleanup) {
         for (int i = 0; i < n_cores; i++) {
@@ -115,6 +114,12 @@ all_series* get_all_pthread(char* str, int size) {
             }
         }
     }
+
+    for (int i = 0; i < n_cores; i++) {
+        free(alls[i].arr);
+    }
+
+    free(alls);
 
     return res_all;
 }
