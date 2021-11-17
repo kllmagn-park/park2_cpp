@@ -39,6 +39,8 @@ jobs:
           make -C build/test_time
           cd build/test_time && ctest --output-on-failure
           cd ..
+          ls build
+          ls build/test_time
           cp build/test_time/main main_shared
           rm -rf build/test_time
           sudo chmod +x ./main_static
