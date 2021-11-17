@@ -29,7 +29,6 @@ jobs:
           cd /usr/src/gtest
           sudo cmake .
           sudo make
-          ls ./lib
           sudo cp ./lib/*.a /usr/lib
           cd -
           sudo apt-get install -y python3
@@ -42,7 +41,6 @@ jobs:
           sudo apt-get install -y valgrind
           sudo apt-get install -y clang-format
           sudo apt-get install -y clang-tidy
-          sudo apt-get install -y cppcheck
           sudo pip install scan-build
           sudo pip install cpplint
 
@@ -64,5 +62,7 @@ jobs:
           cd ..
           cp build/main main_shared
           rm -rf build
-          time ./main_static
-          time ./main_shared
+          sudo chmod +x ./main_static
+          sudo chmod +x ./main_shared
+          sudo time ./main_static
+          sudo time ./main_shared
