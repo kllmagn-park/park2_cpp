@@ -86,8 +86,7 @@ jobs:
 
     - stage: "SharedAnalyze"
       script:
-        - curl -sSL "https://github.com/facebook/infer/releases/download/v1.1.0/infer-linux64-v1.1.0.tar.xz" |
-        sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
+        - curl -sSL "https://github.com/facebook/infer/releases/download/v1.1.0/infer-linux64-v1.1.0.tar.xz" | sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
         - cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
         - sudo make install -C build
         - rm -rf build
