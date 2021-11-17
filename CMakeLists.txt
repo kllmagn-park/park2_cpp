@@ -6,8 +6,6 @@ set(CMAKE_CXX STANDARD 14)
 
 add_compile_options(-Wall -Wextra -pedantic)
 
-set(BUILD_SHARED 1)
-
 if (CMAKE_BUILD_TYPE=Release)
     add_compile_options(-O3)
 elseif(CMAKE_BUILD_TYPE=Debug)
