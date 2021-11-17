@@ -1,3 +1,0 @@
-/usr/local/lib/liblibshared.so
-/usr/local/lib/cmake/LIBSHARED/libsharedConfig.cmake
-/usr/local/lib/cmake/LIBSHARED/libsharedConfig-release.cmake

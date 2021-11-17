@@ -6,6 +6,8 @@ set(CMAKE_CXX STANDARD 14)
 
 add_compile_options(-Wall -Wextra -pedantic)
 
+set(BUILD_SHARED 1)
+
 if (CMAKE_BUILD_TYPE=Release)
     add_compile_options(-O3)
 elseif(CMAKE_BUILD_TYPE=Debug)
@@ -96,7 +98,7 @@ add_subdirectory(lib)
 
 if (BUILD_SHARED AND NOT BUILD_LIB)
     find_package(libshared CONFIG REQUIRED)
-    target_link_libraries(main LIBSHARED::libshared)
+    target_link_libraries(main LIBSHARED::libshared pthread)
 elseif(NOT BUILD_LIB)
     target_link_libraries(main libstatic)
 endif()

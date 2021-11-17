@@ -3,9 +3,9 @@
 int init_all_series(all_series* all) {
     if (all == NULL) return -1;
     if (all->arr == NULL) {
-        all->arr = (char_series*)calloc(sizeof(char_series), 8);
+        all->arr = (char_series*)calloc(sizeof(char_series), 10);
         if (all->arr == NULL) return -1;
-        all->bsize = 8;
+        all->bsize = 10;
         all->size = 0;
     }
     if (all->size >= all->bsize) return -1;
@@ -105,21 +105,22 @@ all_series* get_all(char* str, int size) {
     all_series* all = (all_series*)malloc(sizeof(all_series));
     if (all == NULL) return NULL;
     all->arr = NULL;
-    int s_size;
+    int s_size = 1;
     unsigned int cbits[8];
     int li = 0;
     for (int ri = 1; ri < size; ri++) {
+        if (str[li] == str[ri]) s_size++;
         if ((str[li] != str[ri]) || (ri == size - 1)) { // окончание серии повт.символов
-            s_size = ri - li;
             if (s_size > 1) {
                 int res = set_char(str[li], cbits);
                 if (res != 0) {
-                    free(all->arr); free(all);
+                    free_all(all);
                     return NULL;
                 }
                 res = handle_series(all, s_size, cbits, 1);
+                s_size = 1;
                 if (res != 0) {
-                    free(all->arr); free(all);
+                    free_all(all);
                     return NULL;
                 }
             }

@@ -23,14 +23,14 @@ void* handle_count(void* args) {
     char* str = arguments->str;
     int start = arguments->start;
     int end = arguments->end;
-    char* chunk = str;
+    char* chunk = str+start;
     int chunk_size = end - start;
     all_series* all = get_all(chunk, chunk_size);
     if (all == NULL) {
-        return (void*)1;
+        pthread_exit((void*)1);
     }
     arguments->alls[arguments->i] = *all;
-    return (void*)0;
+    pthread_exit((void*)0);
 }
 
 all_series* get_all_pthread(char* str, int size) {

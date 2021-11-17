@@ -1,5 +1,5 @@
 set(SOURCES src/libshared.c)
-#set(HEADERS include/count.h)
+set(HEADERS include/count.h)
 
 add_library(libshared SHARED ${SOURCES})
 target_link_libraries(libshared $<BUILD_INTERFACE:libcount>)
