@@ -29,8 +29,8 @@ jobs:
           cd /usr/src/gtest
           sudo cmake .
           sudo make
-          ls
-          sudo cp *.a /usr/lib
+          ls ./lib
+          sudo cp ./lib/*.a /usr/lib
           cd -
           sudo apt-get install -y python3
           sudo apt-get install -y python3-pip
