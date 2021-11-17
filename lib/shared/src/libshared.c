@@ -33,8 +33,7 @@ void* handle_count(void* args) {
     pthread_t tid = pthread_self();
     int res = pthread_setaffinity_np(tid, sizeof(cpuset), &cpuset);
     if (res != 0) handle_error_en(res, "pthread_setaffinity_np");
-    res = pthread_getaffinity_np(tid, sizeof(cpuset), &cpuset);
-    if (res != 0) handle_error_en(res, "pthread_getaffinity_np");
+    if (!CPU_ISSET(i, &cpuset)) pthread_exit((void*)1);
     char* str = arguments->str;
     int start = arguments->start;
     int end = arguments->end;
