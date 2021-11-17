@@ -1,12 +1,13 @@
-#include "libcount.h"
-
 #define _GNU_SOURCE
+
+#include "libcount.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 #include <pthread.h>
 #include <unistd.h>
 #include <stdbool.h>
+#include <errno.h>
 
 #define handle_error_en(en, msg) \
                do { errno = en; perror(msg); exit(EXIT_FAILURE); } while (0)
