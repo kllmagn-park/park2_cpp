@@ -70,6 +70,7 @@ jobs:
           sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
           sudo apt-get install -y clang-format
           sudo apt-get install -y clang-tidy
+          sudo apt-get install -y cppcheck
           sudo pip install scan-build
           sudo pip install cpplint
           cmake -B build/static -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DANALYSERS=1
@@ -111,6 +112,7 @@ jobs:
           sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
           sudo apt-get install -y clang-format
           sudo apt-get install -y clang-tidy
+          sudo apt-get install -y cppcheck
           sudo pip install scan-build
           sudo pip install cpplint
           cmake -B build/shared -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
