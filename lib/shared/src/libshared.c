@@ -26,6 +26,14 @@ long get_cores() {
 
 void* handle_count(void* args) {
     thread_args* arguments = (thread_args*)args;
+    int i = arguments->i;
+    cpu_set_t cpuset;
+    CPU_ZERO(&cpuset);
+    CPU_SET(i, &cpuset);
+    int res = pthread_setaffinity_np(thread_ids[i], sizeof(cpuset), &cpuset);
+    if (res != 0) handle_error_en(res, "pthread_setaffinity_np");
+    res = pthread_getaffinity_np(thread_ids[i], sizeof(cpuset), &cpuset);
+    if (res != 0) handle_error_en(res, "pthread_getaffinity_np");
     char* str = arguments->str;
     int start = arguments->start;
     int end = arguments->end;
@@ -35,7 +43,7 @@ void* handle_count(void* args) {
     if (all == NULL) {
         pthread_exit((void*)1);
     }
-    arguments->alls[arguments->i] = *all;
+    arguments->alls[i] = *all;
     free(all);
     pthread_exit((void*)0);
 }
@@ -60,8 +68,6 @@ all_series* get_all_pthread(char* str, int size) {
         return NULL;
     }
 
-    cpu_set_t cpuset;
-
     int start; int end;
 
     for (int i = 0; i < n_cores; i++) {
@@ -72,12 +78,6 @@ all_series* get_all_pthread(char* str, int size) {
             end = start + chunk_size;
         thread_args arg = {str, start, end, alls, i};
         args[i] = arg;
-        CPU_ZERO(&cpuset);
-        CPU_SET(i, &cpuset);
-        int res = pthread_setaffinity_np(thread_ids[i], sizeof(cpuset), &cpuset);
-        if (res != 0) handle_error_en(res, "pthread_setaffinity_np");
-        res = pthread_getaffinity_np(thread_ids[i], sizeof(cpuset), &cpuset);
-        if (res != 0) handle_error_en(res, "pthread_getaffinity_np");
         pthread_create(&thread_ids[i], NULL, handle_count, (void*)&args[i]);
     }
 
