@@ -30,9 +30,10 @@ void* handle_count(void* args) {
     cpu_set_t cpuset;
     CPU_ZERO(&cpuset);
     CPU_SET(i, &cpuset);
-    int res = pthread_setaffinity_np(thread_ids[i], sizeof(cpuset), &cpuset);
+    pthread_t tid = pthread_self();
+    int res = pthread_setaffinity_np(tid, sizeof(cpuset), &cpuset);
     if (res != 0) handle_error_en(res, "pthread_setaffinity_np");
-    res = pthread_getaffinity_np(thread_ids[i], sizeof(cpuset), &cpuset);
+    res = pthread_getaffinity_np(tid, sizeof(cpuset), &cpuset);
     if (res != 0) handle_error_en(res, "pthread_getaffinity_np");
     char* str = arguments->str;
     int start = arguments->start;
