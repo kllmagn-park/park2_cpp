@@ -22,7 +22,22 @@ jobs:
       # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
       - uses: actions/checkout@v2
 
-      # Runs a single command using the runners shell
+      - name: Install
+          - sudo apt-get update
+          - sudo apt-get install -y python3
+          - sudo apt-get install -y python3-pip
+          - sudo apt-get install -y cmake
+          - sudo apt-get install -y cppcheck
+          - sudo apt-get install -y gcovr
+          # - sudo pip install gcovr
+          # - sudo apt-get install -y lynx
+          - sudo apt-get install -y valgrind
+          - sudo apt-get install -y clang-format
+          - sudo apt-get install -y clang-tidy
+          - sudo apt-get install -y cppcheck
+          - sudo pip install scan-build
+          - sudo pip install cpplint
+
       - name: TestAndTime
         run: |
           rm -rf build
