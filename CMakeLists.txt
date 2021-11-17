@@ -67,8 +67,8 @@ if (ANALYSERS)
             COMMAND echo -------------------------------------- scan-build --------------------------------------
             COMMAND scan-build make
 
-            COMMAND echo ---------------------------------------- infer -----------------------------------------
-            COMMAND infer run --compilation-database ./compile_commands.json
+            #        COMMAND echo ---------------------------------------- infer -----------------------------------------
+            #        COMMAND infer run --compilation-database ./compile_commands.json
 
             #        COMMAND echo ---------------------------------------- cpplint ---------------------------------------
             #        COMMAND python3 -m cpplint
