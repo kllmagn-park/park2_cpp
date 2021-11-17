@@ -30,6 +30,7 @@ void* handle_count(void* args) {
         pthread_exit((void*)1);
     }
     arguments->alls[arguments->i] = *all;
+    free(all);
     pthread_exit((void*)0);
 }
 
