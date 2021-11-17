@@ -4,8 +4,6 @@ project(C_DZ2)
 set(CMAKE_C_STANDARD 99)
 set(CMAKE_CXX STANDARD 14)
 
-#set(BUILD_SHARED 1)
-
 add_compile_options(-Wall -Wextra -pedantic)
 
 if (CMAKE_BUILD_TYPE=Release)
