@@ -118,7 +118,10 @@ jobs:
           make -C build
           cd build/ && valgrind --leak-check=yes ctest
 
-      - name: Coverage
+      - uses: codecov/codecov-action@v2
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+        name: Coverage
         run: |
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
           sudo make install -C build

@@ -64,9 +64,8 @@ int find_pos_by_length(all_series* all, unsigned int length) {
     if (all == NULL) return -1;
     if (all->size == 0) return 0;
     int li = 0; int ri = all->size;
-    int ind;
     while (li < ri) {
-        ind = (li+ri)/2;
+        int ind = (li+ri)/2;
         if (all->arr[ind].length < length) {
             li = ind + 1;
         }
