@@ -3,7 +3,6 @@
 #include <time.h>
 
 #include "count.h"
-#include "../include/utils.h"
 
 #define BUF_SIZE 104857600UL
 #define ARR_SIZE BUF_SIZE
