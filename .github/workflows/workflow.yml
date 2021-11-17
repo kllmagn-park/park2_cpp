@@ -25,6 +25,7 @@ jobs:
       # Runs a single command using the runners shell
       - name: TestAndTime
         run: |
+          rm -rf build
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Release -DWPADDED=1
           sudo make install -C build
           rm -rf build
