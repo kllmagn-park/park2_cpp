@@ -15,7 +15,7 @@ jobs:
   time:
     runs-on: ubuntu-latest
     steps:
-      #- uses: actions/checkout@v2
+      - uses: actions/checkout@v2
       - name: TestAndTime
         run: |
           sudo apt-get install -y libgtest-dev
@@ -24,22 +24,23 @@ jobs:
           sudo make
           sudo cp ./lib/*.a /usr/lib
           cd -
-          rm -rf build
-          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Release -DWPADDED=1
-          sudo make install -C build
-          rm -rf build
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DTESTS=1 -DBUILD_STATIC=1 -DWPADDED=1
-          make -C build
-          cd build && ctest --output-on-failure
+          rm -rf build/test_time
+          mkdir -p build/test_time
+          cmake -B build/test_time -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Release -DWPADDED=1
+          sudo make install -C build/test_time
+          rm -rf build/test_time
+          cmake -B build/test_time -DCMAKE_BUILD_TYPE=Release -DTESTS=1 -DBUILD_STATIC=1 -DWPADDED=1
+          make -C build/test_time
+          cd build/test_time && ctest --output-on-failure
           cd ..
-          cp build/main main_static
-          rm -rf build
-          cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED=1 -DTESTS=1 -DWPADDED=1
-          make -C build
-          cd build && ctest --output-on-failure
+          cp build/test_time/main main_static
+          rm -rf build/test_time
+          cmake -B build/test_time -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED=1 -DTESTS=1 -DWPADDED=1
+          make -C build/test_time
+          cd build/test_time && ctest --output-on-failure
           cd ..
-          cp build/main main_shared
-          rm -rf build
+          cp build/test_time/main main_shared
+          rm -rf build/test_time
           sudo chmod +x ./main_static
           sudo chmod +x ./main_shared
           sudo time ./main_static
@@ -48,12 +49,14 @@ jobs:
   static:
     runs-on: ubuntu-latest
     steps:
-      #- uses: actions/checkout@v2
+      - uses: actions/checkout@v2
       - name: StaticSanitize
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DSANITIZERS=1
-          make -C build
-          cd build && ctest --output-on-failure
+          rm -rf build/static
+          mkdir -p build/static
+          cmake -B build/static -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DSANITIZERS=1
+          make -C build/static
+          cd build/static && ctest --output-on-failure
 
       - name: StaticAnalyze
         run: |
@@ -63,29 +66,31 @@ jobs:
           sudo apt-get install -y clang-tidy
           sudo pip install scan-build
           sudo pip install cpplint
-          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DANALYSERS=1
-          make -C build
-          cd build && make analysers
+          cmake -B build/static -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DANALYSERS=1
+          make -C build/static
+          cd build/static && make analysers
 
       - name: StaticValgrind
         run: |
           sudo apt-get install -y valgrind
-          cmake -B build -DBUILD_STATIC=1 -DVALGRIND=1
-          make -C build
-          cd build/ && valgrind --leak-check=yes ctest
+          cmake -B build/static -DBUILD_STATIC=1 -DVALGRIND=1
+          make -C build/static
+          cd build/static/ && valgrind --leak-check=yes ctest
 
   shared:
     runs-on: ubuntu-latest
     steps:
-      #- uses: actions/checkout@v2
+      - uses: actions/checkout@v2
       - name: SharedSanitize
         run: |
-          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
-          sudo make install -C build
-          rm -rf build
-          cmake -B build -DBUILD_LIB=1 -DSANITIZERS=1 -DCMAKE_BUILD_TYPE=Release
-          make -C build
-          cd build && ctest --output-on-failure
+          rm -rf build/shared
+          mkdir -p build/shared
+          cmake -B build/shared/shared -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          sudo make install -C build/shared
+          rm -rf build/shared
+          cmake -B build/shared -DBUILD_LIB=1 -DSANITIZERS=1 -DCMAKE_BUILD_TYPE=Release
+          make -C build/shared
+          cd build/shared && ctest --output-on-failure
 
       - name: SharedAnalyze
         run: |
@@ -95,41 +100,43 @@ jobs:
           sudo apt-get install -y clang-tidy
           sudo pip install scan-build
           sudo pip install cpplint
-          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
-          sudo make install -C build
-          rm -rf build
-          cmake -B build -DBUILD_LIB=1 -DANALYSERS=1 -DCMAKE_BUILD_TYPE=Release
-          make -C build
-          cd build && make analysers
+          cmake -B build/shared -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          sudo make install -C build/shared
+          rm -rf build/shared
+          cmake -B build/shared -DBUILD_LIB=1 -DANALYSERS=1 -DCMAKE_BUILD_TYPE=Release
+          make -C build/shared
+          cd build/shared && make analysers
 
       - name: SharedValgrind
         run: |
           sudo apt-get install -y valgrind
-          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
-          sudo make install -C build
-          rm -rf build
-          cmake -B build -DBUILD_LIB=1 -DVALGRIND=1 -DCMAKE_BUILD_TYPE=Release
-          make -C build
-          cd build/ && valgrind --leak-check=yes ctest
+          cmake -B build/shared -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          sudo make install -C build/shared
+          rm -rf build/shared
+          cmake -B build/shared -DBUILD_LIB=1 -DVALGRIND=1 -DCMAKE_BUILD_TYPE=Release
+          make -C build/shared
+          cd build/shared/ && valgrind --leak-check=yes ctest
 
   coverage:
     runs-on: ubuntu-latest
     steps:
-      #- uses: actions/checkout@v2
+      - uses: actions/checkout@v2
       - uses: codecov/codecov-action@v2
         with:
           token: ${{secrets.CODECOV_TOKEN}}
       - name: Coverage
         run: |
+          rm -rf build/coverage
+          mkdir -p build/coverage/
           sudo pip install gcovr
-          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
-          sudo make install -C build
-          rm -rf build s
-          cmake -B build -DBUILD_STATIC=1 -DCOVERAGE=1 -DCMAKE_BUILD_TYPE=Release
-          make -C build libstatic_test
-          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=1
-          sudo make install -C build
-          cd build && ctest .
+          cmake -B build/coverage -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          sudo make install -C build/coverage
+          rm -rf build/coverage s
+          cmake -B build/coverage -DBUILD_STATIC=1 -DCOVERAGE=1 -DCMAKE_BUILD_TYPE=Release
+          make -C build/coverage libstatic_test
+          cmake -B build/coverage -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=1
+          sudo make install -C build/coverage
+          cd build/coverage && ctest .
           cd ..
           curl -Os https://uploader.codecov.io/latest/linux/codecov
           chmod +x codecov
