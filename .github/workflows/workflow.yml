@@ -38,6 +38,9 @@ jobs:
           sudo apt-get install -y cppcheck
           sudo pip install scan-build
           sudo pip install cpplint
+          sudo apt-get install libgtest-dev && cd /usr/src/gtest && sudo cmake CMakeLists.txt && sudo make && sudo cp *.a /usr/lib && sudo ln -s /usr/lib/libgtest.a /usr/local/lib/libgtest.a && sudo ln -s /usr/lib/libgtest_main.a /usr/local/lib/libgtest_main.a
+          mkdir build && cd build && cmake -DCMAKE_BUILD_TYPE=Release -DCMAKE_CXX_FLAGS="-Werror" ..
+          cd build && make
 
       - name: TestAndTime
         run: |
