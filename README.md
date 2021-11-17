@@ -1,0 +1,1 @@
+[![CI](https://github.com/kllmagn/park2_cpp/actions/workflows/workflow.yml/badge.svg?branch=hw1)](https://github.com/kllmagn/park2_cpp/actions/workflows/workflow.yml)

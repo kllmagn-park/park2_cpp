@@ -1,0 +1,167 @@
+# This is a basic workflow to help you get started with Actions
+
+name: CI
+
+# Controls when the workflow will run
+on:
+  push:
+    branches: [ hw1 ]
+
+  # Allows you to run this workflow manually from the Actions tab
+  workflow_dispatch:
+
+# A workflow run is made up of one or more jobs that can run sequentially or in parallel
+jobs:
+  time:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: TestAndTime
+        run: |
+          sudo apt-get install -y libgtest-dev
+          cd /usr/src/gtest
+          sudo cmake .
+          sudo make
+          sudo cp ./lib/*.a /usr/lib
+          cd -
+          rm -rf build/test_time
+          mkdir -p build/test_time
+          cmake -B build/test_time -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Release -DWPADDED=1
+          sudo make install -C build/test_time
+          rm -rf build/test_time
+          cmake -B build/test_time -DCMAKE_BUILD_TYPE=Release -DTESTS=1 -DBUILD_STATIC=1 -DWPADDED=1
+          make -C build/test_time
+          cd build/test_time && ctest --output-on-failure
+          cd -
+          cp build/test_time/main main_static
+          rm -rf build/test_time
+          cmake -B build/test_time -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED=1 -DTESTS=1 -DWPADDED=1
+          make -C build/test_time
+          cd build/test_time && ctest --output-on-failure
+          cd -
+          cp build/test_time/main main_shared
+          rm -rf build/test_time
+          sudo chmod +x ./main_static
+          sudo chmod +x ./main_shared
+          sudo time ./main_static
+          sudo time ./main_shared
+
+  static:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: StaticSanitize
+        run: |
+          sudo apt-get install -y libgtest-dev
+          cd /usr/src/gtest
+          sudo cmake .
+          sudo make
+          sudo cp ./lib/*.a /usr/lib
+          cd -
+          rm -rf build/static
+          mkdir -p build/static
+          cmake -B build/static -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DSANITIZERS=1
+          make -C build/static
+          cd build/static && ctest --output-on-failure
+
+      - name: StaticAnalyze
+        run: |
+          curl -sSL "https://github.com/facebook/infer/releases/download/v1.1.0/infer-linux64-v1.1.0.tar.xz" |
+          sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
+          sudo apt-get install -y clang-format
+          sudo apt-get install -y clang-tidy
+          sudo apt-get install -y cppcheck
+          sudo pip install scan-build
+          sudo pip install cpplint
+          cmake -B build/static -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DANALYSERS=1
+          make -C build/static
+          cd build/static && make analysers
+          cd -
+
+      - name: StaticValgrind
+        run: |
+          sudo apt-get install -y valgrind
+          cmake -B build/static -DBUILD_STATIC=1 -DVALGRIND=1
+          make -C build/static
+          cd build/static/ && valgrind --leak-check=yes ctest
+
+  shared:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - name: SharedSanitize
+        run: |
+          sudo apt-get install -y libgtest-dev
+          cd /usr/src/gtest
+          sudo cmake .
+          sudo make
+          sudo cp ./lib/*.a /usr/lib
+          cd -
+          rm -rf build/shared
+          mkdir -p build/shared
+          cmake -B build/shared -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          sudo make install -C build/shared
+          rm -rf build/shared
+          cmake -B build/shared -DBUILD_LIB=1 -DSANITIZERS=1 -DCMAKE_BUILD_TYPE=Release
+          make -C build/shared
+          cd build/shared && ctest --output-on-failure
+          cd -
+
+      - name: SharedAnalyze
+        run: |
+          curl -sSL "https://github.com/facebook/infer/releases/download/v1.1.0/infer-linux64-v1.1.0.tar.xz" |
+          sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
+          sudo apt-get install -y clang-format
+          sudo apt-get install -y clang-tidy
+          sudo apt-get install -y cppcheck
+          sudo pip install scan-build
+          sudo pip install cpplint
+          cmake -B build/shared -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          sudo make install -C build/shared
+          rm -rf build/shared
+          cmake -B build/shared -DBUILD_LIB=1 -DANALYSERS=1 -DCMAKE_BUILD_TYPE=Release
+          make -C build/shared
+          cd build/shared && make analysers
+          cd -
+
+      - name: SharedValgrind
+        run: |
+          sudo apt-get install -y valgrind
+          cmake -B build/shared -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          sudo make install -C build/shared
+          rm -rf build/shared
+          cmake -B build/shared -DBUILD_LIB=1 -DVALGRIND=1 -DCMAKE_BUILD_TYPE=Release
+          make -C build/shared
+          cd build/shared/ && valgrind --leak-check=yes ctest
+          cd -
+
+  coverage:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: codecov/codecov-action@v2
+        with:
+          token: ${{secrets.CODECOV_TOKEN}}
+      - name: Coverage
+        run: |
+          sudo apt-get install -y libgtest-dev
+          cd /usr/src/gtest
+          sudo cmake .
+          sudo make
+          sudo cp ./lib/*.a /usr/lib
+          cd -
+          rm -rf build/coverage
+          mkdir -p build/coverage/
+          sudo pip install gcovr
+          cmake -B build/coverage -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+          sudo make install -C build/coverage
+          rm -rf build/coverage s
+          cmake -B build/coverage -DBUILD_STATIC=1 -DCOVERAGE=1 -DCMAKE_BUILD_TYPE=Release
+          make -C build/coverage libstatic_test
+          cmake -B build/coverage -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=1
+          sudo make install -C build/coverage
+          cd build/coverage && ctest .
+          cd -
+          curl -Os https://uploader.codecov.io/latest/linux/codecov
+          chmod +x codecov
+          ./codecov -f <(gcovr -e '.*/tests/.*' -x)
