@@ -1,0 +1,108 @@
+dist: focal
+
+compiler:
+  - gcc
+
+install:
+  - sudo apt-get update
+  - sudo apt-get install -y python3
+  - sudo apt-get install -y python3-pip
+  - sudo apt-get install -y cmake
+  - sudo apt-get install -y cppcheck
+  - sudo apt-get install -y gcovr
+  # - sudo pip install gcovr
+  # - sudo apt-get install -y lynx
+  - sudo apt-get install -y valgrind
+  - sudo apt-get install -y clang-format
+  - sudo apt-get install -y clang-tidy
+  - sudo apt-get install -y cppcheck
+  - sudo pip install scan-build
+  - sudo pip install cpplint
+
+jobs:
+  include:
+    - stage: "TestAndTime"
+      script:
+        - cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Release -DWPADDED=1
+        - sudo make install -C build
+        - rm -rf build
+        - cmake -B build -DCMAKE_BUILD_TYPE=Release -DWITH_TESTS=1 -DBUILD_STATIC=1 -DWPADDED=1
+        - make -C build
+        - cd build && ctest --output-on-failure
+        - cd ..
+        - cp build/main main_static
+        - rm -rf build
+        - cmake -B build -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED=1 -DWITH_TESTS=1 -DWPADDED=1
+        - make -C build
+        - cd build && ctest --output-on-failure
+        - cd ..
+        - cp build/main main_shared
+        - rm -rf build
+        - time ./main_static
+        - time ./main_shared
+
+    - stage: "StaticSanitize"
+      script:
+        - cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DWITH_SANITIZERS=1
+        - make -C build
+        - cd build && ctest --output-on-failure
+
+    - stage: "StaticAnalyze"
+      script:
+        - curl -sSL "https://github.com/facebook/infer/releases/download/v1.1.0/infer-linux64-v1.1.0.tar.xz" |
+          sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
+        - sudo pip install scan-build
+        - sudo pip install cpplint
+        - cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DWITH_ANALYSERS=1
+        - make -C build
+        - cd build && make analysers
+
+    - stage: "StaticValgrind"
+      script:
+        - cmake -B build -DBUILD_STATIC=1 -DWITH_VALGRIND=1
+        - make -C build
+        - cd build/ && valgrind --leak-check=yes ctest
+
+    - stage: "SharedSanitize"
+      script:
+        - cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+        - sudo make install -C build
+        - rm -rf build
+        - cmake -B build -DBUILD_LIB=1 -DWITH_SANITIZERS=1 -DCMAKE_BUILD_TYPE=Release
+        - make -C build
+        - cd build && ctest --output-on-failure
+
+    - stage: "SharedAnalyze"
+      script:
+        - curl -sSL "https://github.com/facebook/infer/releases/download/v1.1.0/infer-linux64-v1.1.0.tar.xz" |
+        sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
+        - cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+        - sudo make install -C build
+        - rm -rf build
+        - cmake -B build -DBUILD_LIB=1 -DWITH_ANALYSERS=1 -DCMAKE_BUILD_TYPE=Release
+        - make -C build
+        - cd build && make analysers
+
+    - stage: "SharedValgrind"
+      script:
+        - cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+        - sudo make install -C build
+        - rm -rf build
+        - cmake -B build -DBUILD_LIB=1 -DWITH_VALGRIND=1 -DCMAKE_BUILD_TYPE=Release
+        - make -C build
+        - cd build/ && valgrind --leak-check=yes ctest
+
+    - stage: "Coverage"
+      script:
+        - cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
+        - sudo make install -C build
+        - rm -rf build s
+        - cmake -B build -DBUILD_STATIC=1 -DWITH_COVERAGE=1 -DCMAKE_BUILD_TYPE=Release
+        - make -C build static_lib_test
+        - cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug -DWITH_COVERAGE=1
+        - sudo make install -C build
+        - cd build && ctest .
+        - cd ..
+        - curl -Os https://uploader.codecov.io/latest/linux/codecov
+        - chmod +x codecov
+        - ./codecov -f <(gcovr -e '.*/tests/.*' -x)
