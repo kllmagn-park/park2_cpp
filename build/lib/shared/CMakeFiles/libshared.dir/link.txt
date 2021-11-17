@@ -1,0 +1,1 @@
+/usr/bin/cc -fPIC -O3 -DNDEBUG -shared -Wl,-soname,liblibshared.so -o liblibshared.so CMakeFiles/libshared.dir/src/libshared.c.o  ../libcount/liblibcount.a 

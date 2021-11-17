@@ -1,0 +1,2 @@
+/usr/bin/ar qc liblibcount.a CMakeFiles/libcount.dir/src/libcount.c.o
+/usr/bin/ranlib liblibcount.a

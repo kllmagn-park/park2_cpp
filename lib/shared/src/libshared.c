@@ -1,4 +1,4 @@
-#include "count.h"
+#include "libcount.h"
 
 #include <stdio.h>
 #include <stdlib.h>

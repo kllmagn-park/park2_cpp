@@ -1,5 +1,7 @@
+find_package(libshared CONFIG REQUIRED)
+
 set(files test.cpp)
-set(target_lib libshared)
+set(target_lib libcount LIBSHARED::libshared)
 set(tests_name libshared_test)
 
 option(SANITIZERS "Use sanitizers")
