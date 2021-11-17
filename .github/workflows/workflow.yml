@@ -12,44 +12,18 @@ on:
 
 # A workflow run is made up of one or more jobs that can run sequentially or in parallel
 jobs:
-  install:
-    # The type of runner that the job will run on
+  time:
     runs-on: ubuntu-latest
-
-    # Steps represent a sequence of tasks that will be executed as part of the job
     steps:
-      # Checks-out your repository under $GITHUB_WORKSPACE, so your job can access it
-      - uses: actions/checkout@v2
-
-      - name: Install
+      #- uses: actions/checkout@v2
+      - name: TestAndTime
         run: |
-          sudo apt-get update
           sudo apt-get install -y libgtest-dev
           cd /usr/src/gtest
           sudo cmake .
           sudo make
           sudo cp ./lib/*.a /usr/lib
           cd -
-          sudo apt-get install -y python3
-          sudo apt-get install -y python3-pip
-          sudo apt-get install -y cmake
-          sudo apt-get install -y cppcheck
-          sudo apt-get install -y gcovr
-          # sudo pip install gcovr
-          # sudo apt-get install -y lynx
-          sudo apt-get install -y valgrind
-          sudo apt-get install -y clang-format
-          sudo apt-get install -y clang-tidy
-          sudo pip install scan-build
-          sudo pip install cpplint
-
-  time:
-    runs-on: ubuntu-latest
-    needs: [install]
-    steps:
-      - uses: actions/checkout@v2
-      - name: TestAndTime
-        run: |
           rm -rf build
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Release -DWPADDED=1
           sudo make install -C build
@@ -73,9 +47,8 @@ jobs:
 
   static:
     runs-on: ubuntu-latest
-    needs: [install]
     steps:
-      - uses: actions/checkout@v2
+      #- uses: actions/checkout@v2
       - name: StaticSanitize
         run: |
           cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DSANITIZERS=1
@@ -86,6 +59,8 @@ jobs:
         run: |
           curl -sSL "https://github.com/facebook/infer/releases/download/v1.1.0/infer-linux64-v1.1.0.tar.xz" |
           sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
+          sudo apt-get install -y clang-format
+          sudo apt-get install -y clang-tidy
           sudo pip install scan-build
           sudo pip install cpplint
           cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DANALYSERS=1
@@ -94,15 +69,15 @@ jobs:
 
       - name: StaticValgrind
         run: |
+          sudo apt-get install -y valgrind
           cmake -B build -DBUILD_STATIC=1 -DVALGRIND=1
           make -C build
           cd build/ && valgrind --leak-check=yes ctest
 
   shared:
     runs-on: ubuntu-latest
-    needs: [install]
     steps:
-      - uses: actions/checkout@v2
+      #- uses: actions/checkout@v2
       - name: SharedSanitize
         run: |
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
@@ -114,8 +89,12 @@ jobs:
 
       - name: SharedAnalyze
         run: |
-          #curl -sSL "https://github.com/facebook/infer/releases/download/v1.1.0/infer-linux64-v1.1.0.tar.xz" |
-          #sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
+          curl -sSL "https://github.com/facebook/infer/releases/download/v1.1.0/infer-linux64-v1.1.0.tar.xz" |
+          sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
+          sudo apt-get install -y clang-format
+          sudo apt-get install -y clang-tidy
+          sudo pip install scan-build
+          sudo pip install cpplint
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
           sudo make install -C build
           rm -rf build
@@ -125,6 +104,7 @@ jobs:
 
       - name: SharedValgrind
         run: |
+          sudo apt-get install -y valgrind
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
           sudo make install -C build
           rm -rf build
@@ -134,14 +114,14 @@ jobs:
 
   coverage:
     runs-on: ubuntu-latest
-    needs: [install]
     steps:
-      - uses: actions/checkout@v2
+      #- uses: actions/checkout@v2
       - uses: codecov/codecov-action@v2
         with:
           token: ${{secrets.CODECOV_TOKEN}}
       - name: Coverage
         run: |
+          sudo pip install gcovr
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
           sudo make install -C build
           rm -rf build s
