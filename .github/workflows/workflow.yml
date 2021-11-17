@@ -124,7 +124,7 @@ jobs:
           sudo make install -C build
           rm -rf build s
           cmake -B build -DBUILD_STATIC=1 -DCOVERAGE=1 -DCMAKE_BUILD_TYPE=Release
-          make -C build static_lib_test
+          make -C build libstatic_test
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=1
           sudo make install -C build
           cd build && ctest .
