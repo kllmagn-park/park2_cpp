@@ -69,7 +69,7 @@ jobs:
 
       - name: StaticSanitize
         run: |
-          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DWITH_SANITIZERS=1
+          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DSANITIZERS=1
           make -C build
           cd build && ctest --output-on-failure
 
@@ -79,13 +79,13 @@ jobs:
           sudo tar -C /opt -xJ && sudo ln -s "/opt/infer-linux64-v1.1.0/bin/infer" /usr/local/bin/infer
           sudo pip install scan-build
           sudo pip install cpplint
-          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DWITH_ANALYSERS=1
+          cmake -B build -DCMAKE_BUILD_TYPE=Debug -DBUILD_STATIC=1 -DANALYSERS=1
           make -C build
           cd build && make analysers
 
       - name: StaticValgrind
         run: |
-          cmake -B build -DBUILD_STATIC=1 -DWITH_VALGRIND=1
+          cmake -B build -DBUILD_STATIC=1 -DVALGRIND=1
           make -C build
           cd build/ && valgrind --leak-check=yes ctest
 
@@ -94,7 +94,7 @@ jobs:
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
           sudo make install -C build
           rm -rf build
-          cmake -B build -DBUILD_LIB=1 -DWITH_SANITIZERS=1 -DCMAKE_BUILD_TYPE=Release
+          cmake -B build -DBUILD_LIB=1 -DSANITIZERS=1 -DCMAKE_BUILD_TYPE=Release
           make -C build
           cd build && ctest --output-on-failure
 
@@ -105,7 +105,7 @@ jobs:
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
           sudo make install -C build
           rm -rf build
-          cmake -B build -DBUILD_LIB=1 -DWITH_ANALYSERS=1 -DCMAKE_BUILD_TYPE=Release
+          cmake -B build -DBUILD_LIB=1 -DANALYSERS=1 -DCMAKE_BUILD_TYPE=Release
           make -C build
           cd build && make analysers
 
@@ -114,7 +114,7 @@ jobs:
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
           sudo make install -C build
           rm -rf build
-          cmake -B build -DBUILD_LIB=1 -DWITH_VALGRIND=1 -DCMAKE_BUILD_TYPE=Release
+          cmake -B build -DBUILD_LIB=1 -DVALGRIND=1 -DCMAKE_BUILD_TYPE=Release
           make -C build
           cd build/ && valgrind --leak-check=yes ctest
 
@@ -123,9 +123,9 @@ jobs:
           cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug
           sudo make install -C build
           rm -rf build s
-          cmake -B build -DBUILD_STATIC=1 -DWITH_COVERAGE=1 -DCMAKE_BUILD_TYPE=Release
+          cmake -B build -DBUILD_STATIC=1 -DCOVERAGE=1 -DCMAKE_BUILD_TYPE=Release
           make -C build static_lib_test
-          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug -DWITH_COVERAGE=1
+          cmake -B build -DBUILD_LIB=1 -DCMAKE_BUILD_TYPE=Debug -DCOVERAGE=1
           sudo make install -C build
           cd build && ctest .
           cd ..
